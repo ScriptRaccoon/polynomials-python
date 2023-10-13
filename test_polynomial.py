@@ -10,7 +10,7 @@ def test_print():
 
 def test_degree():
     assert Polynomial([1]).degree() == 0
-    assert Polynomial.zero().degree() == -inf
+    assert Polynomial.zero().degree() == -INFINITY
     assert Polynomial([0, 0, 2, 0]).degree() == 2
     assert Polynomial([1, 0, 0, -1]).degree() == 3
 
