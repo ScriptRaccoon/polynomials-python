@@ -128,6 +128,11 @@ class Polynomial:
             return self.__scale(other)
         return None
 
+    def __pow__(self, n: int) -> Polynomial:
+        if n == 0:
+            return Polynomial([1])
+        return self * pow(self, n - 1)
+
     def __divmod__(self, other: Polynomial):
         """computes a tuple (q,r) of polynomials such that self = q * other + r
         and deg(r) < deg(other). only allowed when other is not zero."""

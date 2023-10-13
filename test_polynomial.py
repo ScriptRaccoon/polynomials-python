@@ -115,6 +115,12 @@ def test_parse():
     assert Polynomial.parse("X^0 + X + X^2") == Polynomial([1, 1, 1])
 
 
+def test_pow():
+    assert pow(Polynomial([1, 1]), 2) == Polynomial([1, 2, 1])
+    assert pow(Polynomial([1, 1]), 3) == Polynomial([1, 3, 3, 1])
+    assert pow(Polynomial([1, 1]), 4) == Polynomial([1, 4, 6, 4, 1])
+
+
 if __name__ == "__main__":
     test_print()
     test_degree()
@@ -127,4 +133,5 @@ if __name__ == "__main__":
     test_polydiv()
     test_gcd()
     test_parse()
+    test_pow()
     print("Everything passed")
