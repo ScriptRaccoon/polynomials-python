@@ -44,6 +44,7 @@ class Polynomial:
         return s.strip()
 
     def __len__(self):
+        """returns the number of coefficients"""
         return len(self.coeffs)
 
     @staticmethod
@@ -79,9 +80,11 @@ class Polynomial:
         return self.coeffs[-1]
 
     def is_monic(self) -> bool:
+        """checks if a polynomial is monic"""
         return self.lead_coefficient() == 1
 
     def normed(self):
+        """makes a polynomial monic"""
         if self.is_zero():
             return self
         a = self.lead_coefficient()
@@ -124,11 +127,13 @@ class Polynomial:
         return Polynomial(coeffs)
 
     def __rmul__(self, other):
+        """computes a scalar multiple with a polynomial on the right"""
         if isinstance(other, float | int):
             return self.__scale(other)
         return None
 
     def __pow__(self, n: int) -> Polynomial:
+        """computes the power p^n of a polynomial to a natural number n"""
         if n == 0:
             return Polynomial([1])
         return self * pow(self, n - 1)
@@ -157,6 +162,8 @@ class Polynomial:
 
     @staticmethod
     def gcd(p: Polynomial, q: Polynomial):
+        """computes the greatest common divisor of two polynomials p,q
+        with the Euclidean algorithm"""
         if p.is_zero():
             return q.normed()
         if q.is_zero():
@@ -168,6 +175,7 @@ class Polynomial:
 
     @staticmethod
     def parse(str: str, var="X") -> Polynomial:
+        """parses a string to a polynomial if possible"""
         coeffs = []
         str = str.strip().replace("-", "+-").replace(" ", "")
         summands = str.split("+")
