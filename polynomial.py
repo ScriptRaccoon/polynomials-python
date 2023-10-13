@@ -14,7 +14,7 @@ class Polynomial:
         self.var = var
         self.__shorten()
 
-    def __shorten(self):
+    def __shorten(self) -> None:
         """removes the zero coefficients in the end"""
         i = len(self) - 1
         while i >= 0 and self.coeffs[i] == 0:
@@ -24,11 +24,11 @@ class Polynomial:
     def copy(self) -> Polynomial:
         return Polynomial(self.coeffs[:])
 
-    def __eq__(self, other: Polynomial):
+    def __eq__(self, other: Polynomial) -> bool:
         """equality test"""
         return self.coeffs == other.coeffs
 
-    def __str__(self):
+    def __str__(self) -> str:
         """pretty string representation"""
         if all(c == 0 for c in self.coeffs):
             return "0"
@@ -46,7 +46,7 @@ class Polynomial:
 
         return s.strip()
 
-    def __len__(self):
+    def __len__(self) -> int:
         """returns the number of coefficients"""
         return len(self.coeffs)
 
@@ -54,27 +54,27 @@ class Polynomial:
         return sum([self.coeffs[k] * val**k for k in range(len(self))])
 
     @staticmethod
-    def zero():
+    def zero() -> Polynomial:
         """returns the zero polynomial"""
         return Polynomial([])
 
-    def is_zero(self):
+    def is_zero(self) -> bool:
         """checks if polynomial is zero"""
         return len(self) == 0
 
-    def degree(self):
+    def degree(self) -> float | int:
         """returns the degree of the polynomial.
         the zero polynomial has degree -infinity"""
         if len(self) == 0:
             return -INFINITY
         return len(self) - 1
 
-    def __scale(self, u: float | int):
+    def __scale(self, u: float | int) -> Polynomial:
         """returns a scalar multiple of the polynomial"""
         return Polynomial([u * coeff for coeff in self.coeffs])
 
     @staticmethod
-    def X(n: int = 1):
+    def X(n: int = 1) -> Polynomial:
         """returns the polynomial X^n, with n=1 being default"""
         coeffs = [0] * n + [1]
         return Polynomial(coeffs)
@@ -89,18 +89,18 @@ class Polynomial:
         """checks if a polynomial is monic"""
         return self.lead_coefficient() == 1
 
-    def normed(self):
+    def normed(self) -> Polynomial:
         """makes a polynomial monic"""
         if self.is_zero():
             return self
         a = self.lead_coefficient()
         return self.__scale(1 / a)
 
-    def __neg__(self):
+    def __neg__(self) -> Polynomial:
         """computes the additive inverse of a polynomial"""
         return self.__scale(-1)
 
-    def __add__(self, other: Polynomial):
+    def __add__(self, other: Polynomial) -> Polynomial:
         """adds two polynomials"""
         n = max(len(self), len(other))
         sum_coeffs = []
@@ -110,11 +110,11 @@ class Polynomial:
             sum_coeffs.append(a + b)
         return Polynomial(sum_coeffs)
 
-    def __sub__(self, q: Polynomial):
+    def __sub__(self, q: Polynomial) -> Polynomial:
         "subtracts two polynomials"
         return self + (-q)
 
-    def __mul__(self, other: Polynomial):
+    def __mul__(self, other: Polynomial) -> Polynomial:
         """multiplies two polynomials"""
         if isinstance(other, float | int):
             return self.__scale(other)
@@ -132,7 +132,7 @@ class Polynomial:
             coeffs.append(sum(seq))
         return Polynomial(coeffs)
 
-    def __rmul__(self, other):
+    def __rmul__(self, other) -> Polynomial:
         """computes a scalar multiple with a polynomial on the right"""
         if isinstance(other, float | int):
             return self.__scale(other)
@@ -144,7 +144,7 @@ class Polynomial:
             return Polynomial([1])
         return self * pow(self, n - 1)
 
-    def __divmod__(self, other: Polynomial):
+    def __divmod__(self, other: Polynomial) -> tuple[Polynomial, Polynomial]:
         """computes a tuple (q,r) of polynomials such that self = q * other + r
         and deg(r) < deg(other). only allowed when other is not zero."""
         err_msg = "Polynomial division is not allowed for the zero polynomial."
@@ -167,7 +167,7 @@ class Polynomial:
         return quot + corr_term, rem
 
     @staticmethod
-    def gcd(p: Polynomial, q: Polynomial):
+    def gcd(p: Polynomial, q: Polynomial) -> Polynomial:
         """computes the greatest common divisor of two polynomials p,q
         with the Euclidean algorithm"""
         if p.is_zero():
@@ -216,7 +216,7 @@ class Polynomial:
 
         return Polynomial(coeffs, var)
 
-    def derivative(self, n: int = 1):
+    def derivative(self, n: int = 1) -> Polynomial:
         if n == 0:
             return self
         p = self.derivative(n - 1)
