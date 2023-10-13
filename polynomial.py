@@ -21,6 +21,9 @@ class Polynomial:
             self.coeffs.pop()
             i -= 1
 
+    def copy(self) -> Polynomial:
+        return Polynomial(self.coeffs[:])
+
     def __eq__(self, other: Polynomial):
         """equality test"""
         return self.coeffs == other.coeffs
