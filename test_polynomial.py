@@ -1,3 +1,4 @@
+import pytest
 from polynomial import Polynomial, INFINITY
 
 
@@ -85,6 +86,9 @@ def test_polydiv():
         Polynomial([-4]),
     )
 
+    with pytest.raises(ZeroDivisionError):
+        divmod(Polynomial([2, 2]), Polynomial.zero())
+
 
 def test_gcd():
     assert Polynomial.gcd(Polynomial([0, 1, 1]), Polynomial([0, -1, 1])) == Polynomial(
@@ -113,6 +117,20 @@ def test_parse():
         [0, 0, -2, 0, 4, 0, -4]
     )
     assert Polynomial.parse("X^0 + X + X^2") == Polynomial([1, 1, 1])
+
+    assert Polynomial.parse("T^0 + T + T^2", "T") == Polynomial([1, 1, 1])
+
+    with pytest.raises(ValueError):
+        Polynomial.parse("2*X - X^")
+
+    with pytest.raises(ValueError):
+        Polynomial.parse("2*X - a * X^2")
+
+    with pytest.raises(ValueError):
+        Polynomial.parse("2*X - X^r")
+
+    with pytest.raises(ValueError):
+        Polynomial.parse("X", "T")
 
 
 def test_pow():
