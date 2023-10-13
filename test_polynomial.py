@@ -57,6 +57,14 @@ def test_lead_coefficient():
     assert Polynomial.zero().lead_coefficient() == 0
     assert Polynomial([4, -1]).lead_coefficient() == -1
     assert Polynomial([2, 0, 2, 0]).lead_coefficient() == 2
+    assert Polynomial([4, 1]).is_monic()
+    assert not Polynomial([4, 2]).is_monic()
+
+
+def test_normed():
+    assert Polynomial([3, 2]).normed() == Polynomial([1.5, 1])
+    assert Polynomial.zero().normed() == Polynomial.zero()
+    assert Polynomial.X(5).normed() == Polynomial.X(5)
 
 
 def test_polydiv():
@@ -78,6 +86,26 @@ def test_polydiv():
     )
 
 
+def test_gcd():
+    assert Polynomial.gcd(Polynomial([0, 1, 1]), Polynomial([0, -1, 1])) == Polynomial(
+        [0, 1]
+    )
+    assert Polynomial.gcd(
+        Polynomial([0, 1, 1]), Polynomial([0, -1, 0, 1])
+    ) == Polynomial([0, 1, 1])
+    assert Polynomial.gcd(
+        Polynomial([0, 2, 1]), Polynomial([0, -1, 0, 1])
+    ) == Polynomial([0, 1])
+
+    assert Polynomial.gcd(Polynomial([0, 1]), Polynomial([2, 1])) == Polynomial([1])
+
+    assert Polynomial.gcd(
+        Polynomial([-1, 0, -1, 0, 1, 0, 1]), Polynomial([1, -3, 2, -3, 1])
+    ) == Polynomial(
+        [0.9999999999999999, 0, 0.9999999999999999]  # rounding error!
+    )
+
+
 if __name__ == "__main__":
     test_print()
     test_degree()
@@ -86,5 +114,7 @@ if __name__ == "__main__":
     test_X()
     test_mul()
     test_lead_coefficient()
+    test_normed()
     test_polydiv()
+    test_gcd()
     print("Everything passed")

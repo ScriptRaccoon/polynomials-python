@@ -77,6 +77,15 @@ class Polynomial:
             return 0
         return self.coeffs[-1]
 
+    def is_monic(self) -> bool:
+        return self.lead_coefficient() == 1
+
+    def normed(self):
+        if self.is_zero():
+            return self
+        a = self.lead_coefficient()
+        return self.__scale(1 / a)
+
     def __neg__(self):
         """computes the additive inverse of a polynomial"""
         return self.__scale(-1)
@@ -139,3 +148,14 @@ class Polynomial:
         quot, rem = divmod(f, other)
 
         return quot + corr_term, rem
+
+    @staticmethod
+    def gcd(p: Polynomial, q: Polynomial):
+        if p.is_zero():
+            return q.normed()
+        if q.is_zero():
+            return p.normed()
+        if p.degree() < q.degree():
+            return Polynomial.gcd(q, p)
+        _, rem = divmod(p, q)
+        return Polynomial.gcd(q, rem)
