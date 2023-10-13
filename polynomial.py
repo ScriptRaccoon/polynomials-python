@@ -8,9 +8,10 @@ class Polynomial:
     The polynomial a_0 + a_1 X + a_2 X^2 + .... is encoded by the finite sequence
     [a_0, a_1, a_2, ...]"""
 
-    def __init__(self, coeffs: list[float | int] = []):
+    def __init__(self, coeffs: list[float | int] = [], var: str = "X"):
         """constructor accepting a list of coefficients"""
         self.coeffs = coeffs
+        self.var = var
         self.__shorten()
 
     def __shorten(self):
@@ -36,9 +37,9 @@ class Polynomial:
                 continue
 
             if coeff > 0:
-                s += f"+ {coeff}*X^{i} "
+                s += f"+ {coeff}*{self.var}^{i} "
             elif coeff < 0:
-                s += f"- {-coeff}*X^{i} "
+                s += f"- {-coeff}*{self.var}^{i} "
 
         return s.strip()
 
@@ -159,3 +160,39 @@ class Polynomial:
             return Polynomial.gcd(q, p)
         _, rem = divmod(p, q)
         return Polynomial.gcd(q, rem)
+
+    @staticmethod
+    def parse(str: str, var="X") -> Polynomial:
+        coeffs = []
+        str = str.strip().replace("-", "+-").replace(" ", "")
+        summands = str.split("+")
+        for summand in summands:
+            if len(summand) == 0:
+                continue
+            if "*" in summand:
+                coeff, monomial = summand.split("*")
+            else:
+                coeff, monomial = "1", summand
+
+            try:
+                coeff = float(coeff)
+            except:
+                raise ValueError(f"Coefficient '{coeff}' is not a number")
+
+            if monomial == var:
+                monomial += "^1"
+            monomial_valid = (
+                monomial.startswith(var + "^")
+                and monomial[2:].isnumeric()
+                and len(monomial) > 2
+            )
+            if not monomial_valid:
+                raise ValueError(f"'{monomial}' is not a valid monomial in {var}")
+
+            exponent = int(monomial[2:])
+            while exponent >= len(coeffs):
+                coeffs.append(0)
+
+            coeffs[exponent] += coeff
+
+        return Polynomial(coeffs, var)

@@ -106,6 +106,15 @@ def test_gcd():
     )
 
 
+def test_parse():
+    assert Polynomial.parse("2 * X^2 - 4 * X + 6 * X^0") == Polynomial([6, -4, 2])
+    assert Polynomial.parse("2 * X^2 - 2 * X^2") == Polynomial.zero()
+    assert Polynomial.parse("4 * X^4 - 2 * X^2 - 4 * X^6") == Polynomial(
+        [0, 0, -2, 0, 4, 0, -4]
+    )
+    assert Polynomial.parse("X^0 + X + X^2") == Polynomial([1, 1, 1])
+
+
 if __name__ == "__main__":
     test_print()
     test_degree()
@@ -117,4 +126,5 @@ if __name__ == "__main__":
     test_normed()
     test_polydiv()
     test_gcd()
+    test_parse()
     print("Everything passed")
