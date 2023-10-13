@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-INFINITY = float("inf")  # gros schreiben evtl
+INFINITY = float("inf")
 
 
 class Polynomial:
