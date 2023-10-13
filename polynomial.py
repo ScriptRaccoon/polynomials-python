@@ -8,10 +8,17 @@ class Polynomial:
     The polynomial a_0 + a_1 X + a_2 X^2 + .... is encoded by the finite sequence
     [a_0, a_1, a_2, ...]"""
 
-    def __init__(self, coeffs: list[float] = []):
+    def __init__(self, coeffs: list[float | int] = []):
         """constructor accepting a list of coefficients"""
         self.coeffs = coeffs
         self.__shorten()
+
+    def __shorten(self):
+        """removes the zero coefficients in the end"""
+        i = len(self) - 1
+        while i >= 0 and self.coeffs[i] == 0:
+            self.coeffs.pop()
+            i -= 1
 
     def __eq__(self, other: Polynomial):
         """equality test"""
@@ -35,6 +42,9 @@ class Polynomial:
 
         return s.strip()
 
+    def __len__(self):
+        return len(self.coeffs)
+
     @staticmethod
     def zero():
         """returns the zero polynomial"""
@@ -42,48 +52,53 @@ class Polynomial:
 
     def is_zero(self):
         """checks if polynomial is zero"""
-        return len(self.coeffs) == 0
-
-    def __shorten(self):
-        """removes the zero coefficients in the end"""
-        i = len(self.coeffs) - 1
-        while i >= 0 and self.coeffs[i] == 0:
-            self.coeffs.pop()
-            i -= 1
+        return len(self) == 0
 
     def degree(self):
         """returns the degree of the polynomial.
         the zero polynomial has degree -infinity"""
-        if len(self.coeffs) == 0:
+        if len(self) == 0:
             return -INFINITY
-        return len(self.coeffs) - 1
+        return len(self) - 1
 
-    def scale(self, u):
+    def __scale(self, u: float | int):
         """returns a scalar multiple of the polynomial"""
-        return Polynomial([u * c for c in self.coeffs])
-
-    def add(self, other: Polynomial):
-        """adds a polynomial to the polynomial, returns a new one"""
-        n = max(len(self.coeffs), len(other.coeffs))
-        sum_coeffs = []
-        for i in range(n):
-            a = self.coeffs[i] if i < len(self.coeffs) else 0
-            b = other.coeffs[i] if i < len(other.coeffs) else 0
-            sum_coeffs.append(a + b)
-        return Polynomial(sum_coeffs)
-
-    def subtr(self, q):
-        "substracts a polynomial from the polynomial, returns a new one"
-        return self.add(q.scale(-1))
+        return Polynomial([u * coeff for coeff in self.coeffs])
 
     @staticmethod
-    def X(n=1):
+    def X(n: int = 1):
         """returns the polynomial X^n, with n=1 being default"""
         coeffs = [0] * n + [1]
         return Polynomial(coeffs)
 
-    def mult(self, other):
-        """multiplies the polynomial with another polynomial, returns a new one"""
+    def lead_coefficient(self) -> float | int:
+        """gets the lead coefficient of the polynomial, 0 in case it's the zero polynomial"""
+        if self.is_zero():
+            return 0
+        return self.coeffs[-1]
+
+    def __neg__(self):
+        """computes the additive inverse of a polynomial"""
+        return self.__scale(-1)
+
+    def __add__(self, other: Polynomial):
+        """adds two polynomials"""
+        n = max(len(self), len(other))
+        sum_coeffs = []
+        for i in range(n):
+            a = self.coeffs[i] if i < len(self) else 0
+            b = other.coeffs[i] if i < len(other) else 0
+            sum_coeffs.append(a + b)
+        return Polynomial(sum_coeffs)
+
+    def __sub__(self, q: Polynomial):
+        "subtracts two polynomials"
+        return self + (-q)
+
+    def __mul__(self, other: Polynomial):
+        """multiplies two polynomials"""
+        if isinstance(other, float | int):
+            return self.__scale(other)
         coeffs = []
         n = self.degree()
         m = other.degree()
@@ -98,19 +113,17 @@ class Polynomial:
             coeffs.append(sum(seq))
         return Polynomial(coeffs)
 
-    def lead_coefficient(self) -> float:
-        """gets the lead coefficient of the polynomial, 0 in case it's the zero polynomial"""
-        if self.is_zero():
-            return 0
-        return self.coeffs[-1]
+    def __rmul__(self, other):
+        if isinstance(other, float | int):
+            return self.__scale(other)
+        return None
 
-    def div(self, other):
-        """polynomial division: computes a tuple (q,r) of polynomials such that
-        self = q * g + r and deg(r) < deg(g). only allowed when g is not zero."""
+    def __divmod__(self, other: Polynomial):
+        """computes a tuple (q,r) of polynomials such that self = q * other + r
+        and deg(r) < deg(other). only allowed when other is not zero."""
+        err_msg = "Polynomial division is not allowed for the zero polynomial."
         if other.is_zero():
-            raise ZeroDivisionError(
-                "Polynomial division is not allowed for the zero polynomial."
-            )
+            raise ZeroDivisionError(err_msg)
 
         n = self.degree()
         m = other.degree()
@@ -121,8 +134,8 @@ class Polynomial:
         lead_self = self.lead_coefficient()
         lead_other = other.lead_coefficient()
 
-        corr_term = Polynomial.X(n - m).scale(lead_self / lead_other)
-        f = self.subtr(corr_term.mult(other))
-        quot, rem = f.div(other)
+        corr_term = Polynomial.X(n - m) * (lead_self / lead_other)
+        f = self - corr_term * other
+        quot, rem = divmod(f, other)
 
-        return quot.add(corr_term), rem
+        return quot + corr_term, rem
