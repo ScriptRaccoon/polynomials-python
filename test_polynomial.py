@@ -1,4 +1,4 @@
-from polynomial import *
+from polynomial import Polynomial, INFINITY
 
 
 def test_print():
@@ -132,22 +132,3 @@ def test_derivative():
     assert Polynomial([4, 2, 1]).derivative() == Polynomial([2, 2])
     assert Polynomial([4, 2, 1]).derivative(2) == Polynomial([2])
     assert Polynomial([4, 2, 1]).derivative(3) == Polynomial.zero()
-
-
-if __name__ == "__main__":
-    test_print()
-    test_degree()
-    test_sum()
-    test_sub()
-    test_X()
-    test_mul()
-    test_lead_coefficient()
-    test_normed()
-    test_polydiv()
-    test_gcd()
-    test_parse()
-    test_pow()
-    test_call()
-    test_derivative()
-
-    print("Everything passed")
