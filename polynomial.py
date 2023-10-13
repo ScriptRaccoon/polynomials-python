@@ -47,6 +47,9 @@ class Polynomial:
         """returns the number of coefficients"""
         return len(self.coeffs)
 
+    def __call__(self, val: int | float) -> int | float:
+        return sum([self.coeffs[k] * val**k for k in range(len(self))])
+
     @staticmethod
     def zero():
         """returns the zero polynomial"""

@@ -121,6 +121,12 @@ def test_pow():
     assert pow(Polynomial([1, 1]), 4) == Polynomial([1, 4, 6, 4, 1])
 
 
+def test_call():
+    assert Polynomial([1, 0, 3])(2) == 13
+    assert Polynomial.zero()(2) == 0
+    assert Polynomial.X(7)(2) == 128
+
+
 if __name__ == "__main__":
     test_print()
     test_degree()
@@ -134,4 +140,5 @@ if __name__ == "__main__":
     test_gcd()
     test_parse()
     test_pow()
+    test_call()
     print("Everything passed")
