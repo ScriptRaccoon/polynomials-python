@@ -212,3 +212,10 @@ class Polynomial:
             coeffs[exponent] += coeff
 
         return Polynomial(coeffs, var)
+
+    def derivative(self, n: int = 1):
+        if n == 0:
+            return self
+        p = self.derivative(n - 1)
+        new_coeffs = [(k + 1) * p.coeffs[k + 1] for k in range(len(p) - 1)]
+        return Polynomial(new_coeffs)

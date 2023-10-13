@@ -127,6 +127,13 @@ def test_call():
     assert Polynomial.X(7)(2) == 128
 
 
+def test_derivative():
+    assert Polynomial.X(5).derivative() == Polynomial([0, 0, 0, 0, 5])
+    assert Polynomial([4, 2, 1]).derivative() == Polynomial([2, 2])
+    assert Polynomial([4, 2, 1]).derivative(2) == Polynomial([2])
+    assert Polynomial([4, 2, 1]).derivative(3) == Polynomial.zero()
+
+
 if __name__ == "__main__":
     test_print()
     test_degree()
@@ -141,4 +148,6 @@ if __name__ == "__main__":
     test_parse()
     test_pow()
     test_call()
+    test_derivative()
+
     print("Everything passed")
