@@ -9,6 +9,11 @@ def test_print():
     assert str(Polynomial.zero()) == "0"
 
 
+def test_copy():
+    assert Polynomial([2, 3, 4]).copy() == Polynomial([2, 3, 4])
+    assert Polynomial([2, 3, 4]).copy() is not Polynomial([2, 3, 4])
+
+
 def test_degree():
     assert Polynomial([1]).degree() == 0
     assert Polynomial.zero().degree() == -INFINITY
@@ -48,10 +53,10 @@ def test_mul():
     assert Polynomial([-1, 1]) * Polynomial([1, 1, 1, 1]) == Polynomial(
         [-1, 0, 0, 0, 1]
     )
-
     assert Polynomial([2, 3]) * 5 == Polynomial([10, 15])
     assert 2 * Polynomial([1, -1]) == Polynomial([2, -2])
     assert Polynomial([10, 2]) * 0.1 == Polynomial([1, 0.2])
+    assert "test" * Polynomial([10, 2]) == None
 
 
 def test_lead_coefficient():
@@ -85,12 +90,13 @@ def test_polydiv():
         Polynomial([1.5]),
         Polynomial([-4]),
     )
-
     with pytest.raises(ZeroDivisionError):
         divmod(Polynomial([2, 2]), Polynomial.zero())
 
 
 def test_gcd():
+    assert Polynomial.gcd(Polynomial([1, 2]), Polynomial.zero()) == Polynomial([0.5, 1])
+    assert Polynomial.gcd(Polynomial.zero(), Polynomial([1, 2])) == Polynomial([0.5, 1])
     assert Polynomial.gcd(Polynomial([0, 1, 1]), Polynomial([0, -1, 1])) == Polynomial(
         [0, 1]
     )
@@ -100,9 +106,7 @@ def test_gcd():
     assert Polynomial.gcd(
         Polynomial([0, 2, 1]), Polynomial([0, -1, 0, 1])
     ) == Polynomial([0, 1])
-
     assert Polynomial.gcd(Polynomial([0, 1]), Polynomial([2, 1])) == Polynomial([1])
-
     assert Polynomial.gcd(
         Polynomial([-1, 0, -1, 0, 1, 0, 1]), Polynomial([1, -3, 2, -3, 1])
     ) == Polynomial(
@@ -117,18 +121,15 @@ def test_parse():
         [0, 0, -2, 0, 4, 0, -4]
     )
     assert Polynomial.parse("X^0 + X + X^2") == Polynomial([1, 1, 1])
-
     assert Polynomial.parse("T^0 + T + T^2", "T") == Polynomial([1, 1, 1])
-
+    assert Polynomial.parse("2 * X") == 2 * Polynomial.X()
+    assert Polynomial.parse("-2 * X") == -2 * Polynomial.X()
     with pytest.raises(ValueError):
         Polynomial.parse("2*X - X^")
-
     with pytest.raises(ValueError):
         Polynomial.parse("2*X - a * X^2")
-
     with pytest.raises(ValueError):
         Polynomial.parse("2*X - X^r")
-
     with pytest.raises(ValueError):
         Polynomial.parse("X", "T")
 
