@@ -2,6 +2,11 @@ import pytest
 from polynomial import Polynomial, INFINITY
 
 
+def test_eq():
+    assert Polynomial([1, 4, 2]) == Polynomial([1, 4, 2])
+    assert not Polynomial([1, 4, 2]) == "somestring"
+
+
 def test_print():
     assert str(Polynomial([1, 0, -2])) == "+ 1*X^0 - 2*X^2"
     assert str(Polynomial()) == "0"
@@ -56,7 +61,8 @@ def test_mul():
     assert Polynomial([2, 3]) * 5 == Polynomial([10, 15])
     assert 2 * Polynomial([1, -1]) == Polynomial([2, -2])
     assert Polynomial([10, 2]) * 0.1 == Polynomial([1, 0.2])
-    assert "test" * Polynomial([10, 2]) == None
+    with pytest.raises(NotImplementedError):
+        "test" * Polynomial([10, 2])
 
 
 def test_lead_coefficient():
@@ -138,6 +144,8 @@ def test_pow():
     assert pow(Polynomial([1, 1]), 2) == Polynomial([1, 2, 1])
     assert pow(Polynomial([1, 1]), 3) == Polynomial([1, 3, 3, 1])
     assert pow(Polynomial([1, 1]), 4) == Polynomial([1, 4, 6, 4, 1])
+    with pytest.raises(NotImplementedError):
+        pow(Polynomial([5, 2]), -2)
 
 
 def test_call():

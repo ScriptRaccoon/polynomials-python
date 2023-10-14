@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import cast
 
 INFINITY = float("inf")
 
@@ -8,7 +9,7 @@ class Polynomial:
     The polynomial a_0 + a_1 X + a_2 X^2 + .... is encoded by the finite sequence
     [a_0, a_1, a_2, ...]"""
 
-    def __init__(self, coeffs: list[float | int] = [], var: str = "X"):
+    def __init__(self, coeffs: list[float | int] = [], var: str = "X") -> None:
         """constructor accepting a list of coefficients"""
         self.coeffs = coeffs
         self.var = var
@@ -24,8 +25,10 @@ class Polynomial:
     def copy(self) -> Polynomial:
         return Polynomial(self.coeffs[:])
 
-    def __eq__(self, other: Polynomial) -> bool:
+    def __eq__(self, other: object) -> bool:
         """equality test"""
+        if not isinstance(other, Polynomial):
+            return False
         return self.coeffs == other.coeffs
 
     def __str__(self) -> str:
@@ -76,7 +79,7 @@ class Polynomial:
     @staticmethod
     def X(n: int = 1) -> Polynomial:
         """returns the polynomial X^n, with n=1 being default"""
-        coeffs = [0] * n + [1]
+        coeffs = cast(list[int | float], [0] * n + [1])
         return Polynomial(coeffs)
 
     def lead_coefficient(self) -> float | int:
@@ -114,15 +117,16 @@ class Polynomial:
         "subtracts two polynomials"
         return self + (-q)
 
-    def __mul__(self, other: Polynomial) -> Polynomial:
+    def __mul__(self, other: Polynomial | float | int) -> Polynomial:
         """multiplies two polynomials"""
         if isinstance(other, float | int):
             return self.__scale(other)
-        coeffs = []
-        n = self.degree()
-        m = other.degree()
-        if n < 0 or m < 0:
+        coeffs: list[int | float] = []
+
+        if self.is_zero() < 0 or other.is_zero():
             return Polynomial.zero()
+        n = cast(int, self.degree())
+        m = cast(int, other.degree())
         for k in range(n + m + 1):
             seq = [
                 self.coeffs[i] * other.coeffs[k - i]
@@ -136,10 +140,13 @@ class Polynomial:
         """computes a scalar multiple with a polynomial on the right"""
         if isinstance(other, float | int):
             return self.__scale(other)
-        return None
+        else:
+            raise NotImplementedError
 
     def __pow__(self, n: int) -> Polynomial:
         """computes the power p^n of a polynomial to a natural number n"""
+        if n < 0:
+            raise NotImplementedError
         if n == 0:
             return Polynomial([1])
         return self * pow(self, n - 1)
@@ -151,8 +158,11 @@ class Polynomial:
         if other.is_zero():
             raise ZeroDivisionError(err_msg)
 
-        n = self.degree()
-        m = other.degree()
+        if self.is_zero():
+            return Polynomial.zero(), Polynomial.zero()
+
+        n = cast(int, self.degree())
+        m = cast(int, other.degree())
 
         if n < m:
             return Polynomial.zero(), self
@@ -182,21 +192,21 @@ class Polynomial:
     @staticmethod
     def parse(str: str, var="X") -> Polynomial:
         """parses a string to a polynomial if possible"""
-        coeffs = []
+        coeffs: list[float | int] = []
         str = str.strip().replace("-", "+-").replace(" ", "")
         summands = str.split("+")
         for summand in summands:
             if len(summand) == 0:
                 continue
             if "*" in summand:
-                coeff, monomial = summand.split("*")
+                coeff_str, monomial = summand.split("*")
             else:
-                coeff, monomial = "1", summand
+                coeff_str, monomial = "1", summand
 
             try:
-                coeff = float(coeff)
+                coeff = float(coeff_str)
             except:
-                raise ValueError(f"Coefficient '{coeff}' is not a number")
+                raise ValueError(f"Coefficient '{coeff_str}' is not a number")
 
             if monomial == var:
                 monomial += "^1"
