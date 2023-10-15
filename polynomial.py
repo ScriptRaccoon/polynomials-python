@@ -259,7 +259,7 @@ class Polynomial:
         if isinstance(other, float | int):
             return self.__scale(other)
         coeffs: list[int | float] = []
-        if self.is_zero() < 0 or other.is_zero():
+        if self.is_zero() or other.is_zero():
             return Polynomial.zero()
         n = cast(int, self.degree())
         m = cast(int, other.degree())

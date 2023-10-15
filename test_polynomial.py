@@ -2,128 +2,127 @@ import pytest
 from polynomial import Polynomial, INFINITY
 
 
-def test_eq():
-    assert Polynomial([1, 4, 2]) == Polynomial([1, 4, 2])
-    assert not Polynomial([1, 4, 2]) == "somestring"
+@pytest.fixture
+def zero():
+    return Polynomial.zero()
 
 
-def test_print():
-    assert str(Polynomial([1, 0, -2])) == "+ 1*X^0 - 2*X^2"
-    assert str(Polynomial()) == "0"
-    assert str(Polynomial([0])) == "0"
-    assert str(Polynomial.zero()) == "0"
+@pytest.fixture
+def sample():
+    return Polynomial([1, -4, 0, 2])
 
 
-def test_copy():
-    assert Polynomial([2, 3, 4]).copy() == Polynomial([2, 3, 4])
-    assert Polynomial([2, 3, 4]).copy() is not Polynomial([2, 3, 4])
+def test_zero(zero: Polynomial):
+    assert Polynomial([]) == Polynomial([0]) == Polynomial([0, 0]) == zero
 
 
-def test_degree():
-    assert Polynomial([1]).degree() == 0
-    assert Polynomial.zero().degree() == -INFINITY
-    assert Polynomial([0, 0, 2, 0]).degree() == 2
-    assert Polynomial([1, 0, 0, -1]).degree() == 3
+def test_eq(sample: Polynomial):
+    assert sample == Polynomial([1, -4, 0, 2])
+    assert not sample == "not ok"
 
 
-def test_sum():
-    assert -Polynomial([2, 3]) == Polynomial([-2, -3])
-    assert Polynomial.zero() + Polynomial([2]) == Polynomial([2])
-    assert Polynomial([2]) + Polynomial([3]) == Polynomial([5])
-    assert Polynomial([2]) + Polynomial([-2]) == Polynomial.zero()
-    assert Polynomial([4, 2, 1]) + Polynomial([0, 3, -1, 3]) == Polynomial([4, 5, 0, 3])
-    assert Polynomial([0, 0, 1, 0]) + Polynomial([0, 0, 0, 1]) == Polynomial(
-        [0, 0, 1, 1]
-    )
+def test_print(zero: Polynomial, sample: Polynomial):
+    assert str(sample) == "+ 1*X^0 - 4*X^1 + 2*X^3"
+    assert str(zero) == "0"
 
 
-def test_sub():
-    assert Polynomial([2, 4]) - Polynomial([1, 1]) == Polynomial([1, 3])
-    assert Polynomial([2, 4]) - Polynomial.zero() == Polynomial([2, 4])
+def test_copy(sample: Polynomial):
+    assert sample.copy() == Polynomial([1, -4, 0, 2])
+    assert sample.copy() is not sample
+
+
+def test_degree(zero: Polynomial, sample: Polynomial):
+    assert sample.degree() == 3
+    assert zero.degree() == -INFINITY
+
+
+def test_neg(zero: Polynomial, sample: Polynomial):
+    assert -sample == Polynomial([-1, 4, 0, -2])
+    assert -zero == zero
+
+
+def test_sum(zero: Polynomial, sample: Polynomial):
+    assert zero + sample == sample + zero == sample
+    assert sample == Polynomial([1, 0, 0]) + Polynomial([0, -4, 0, 2])
+    assert sample + (-sample) == zero
+    assert sample + sample == Polynomial([2, -8, 0, 4])
+
+
+def test_sub(zero: Polynomial, sample: Polynomial):
+    assert sample - Polynomial([1, 1]) == Polynomial([0, -5, 0, 2])
+    assert sample - zero == sample
+    assert zero - sample == -sample
 
 
 def test_X():
-    assert Polynomial.X().degree() == 1
-    assert Polynomial.X().coeffs == [0, 1]
+    x = Polynomial.X()
+    assert x.degree() == 1
+    assert x.coeffs == [0, 1]
+    assert x == Polynomial.X(1)
     assert Polynomial.X(2).degree() == 2
     assert Polynomial.X(2).coeffs == [0, 0, 1]
-    assert Polynomial.X(1) == Polynomial.X()
 
 
-def test_mul():
-    assert Polynomial.zero() * Polynomial.zero() == Polynomial([0])
-    assert Polynomial([1, 2, 3]) * Polynomial([0, 0, 1]) == Polynomial([0, 0, 1, 2, 3])
-    assert Polynomial([1, 2, 3]) * Polynomial([0]) == Polynomial.zero()
-    assert Polynomial([1, 1]) * Polynomial([1, 1]) == Polynomial([1, 2, 1])
-    assert Polynomial([-1, 1]) * Polynomial([1, 1, 1, 1]) == Polynomial(
-        [-1, 0, 0, 0, 1]
-    )
-    assert Polynomial([2, 3]) * 5 == Polynomial([10, 15])
-    assert 2 * Polynomial([1, -1]) == Polynomial([2, -2])
-    assert Polynomial([10, 2]) * 0.1 == Polynomial([1, 0.2])
+def test_mul(zero: Polynomial, sample: Polynomial):
+    assert zero * zero == zero
+    assert sample * zero == zero * sample == zero
+    assert sample * Polynomial([1, 2]) == Polynomial([1, -2, -8, 2, 4])
+    assert Polynomial([1, 2]) * sample == Polynomial([1, -2, -8, 2, 4])
+    assert sample * Polynomial.X(2) == Polynomial([0, 0, 1, -4, 0, 2])
+    assert sample * 3 == 3 * sample == Polynomial([3, -12, 0, 6])
     with pytest.raises(TypeError):
-        "test" * Polynomial([10, 2])
+        "not ok" * sample
 
 
-def test_lead_coefficient():
+def test_lead_coefficient(zero: Polynomial, sample: Polynomial):
     with pytest.raises(ValueError):
-        Polynomial.zero().lead_coefficient()
-    assert Polynomial([4, -1]).lead_coefficient() == -1
-    assert Polynomial([2, 0, 2, 0]).lead_coefficient() == 2
-    assert Polynomial([4, 1]).is_monic()
-    assert not Polynomial([4, 2]).is_monic()
+        zero.lead_coefficient()
+    assert sample.lead_coefficient() == 2
+    assert Polynomial.X(5).lead_coefficient() == 1
 
 
-def test_normed():
-    assert Polynomial([3, 2]).make_monic() == Polynomial([1.5, 1])
+def test_is_monic(zero: Polynomial, sample: Polynomial):
+    assert not zero.is_monic()
+    assert not sample.is_monic()
+    assert Polynomial.X(5).is_monic()
+
+
+def test_make_monic(zero: Polynomial, sample: Polynomial):
     with pytest.raises(ValueError):
-        Polynomial.zero().make_monic()
+        zero.make_monic()
+    assert sample.make_monic() == Polynomial([0.5, -2, 0, 1])
     assert Polynomial.X(5).make_monic() == Polynomial.X(5)
 
 
-def test_polydiv():
-    assert divmod(Polynomial([5, 4, 1]), Polynomial([1, 1])) == (
-        Polynomial([3, 1]),
-        Polynomial([2]),
+def test_polydiv(zero: Polynomial, sample: Polynomial):
+    assert divmod(sample, Polynomial([1, 1])) == (
+        Polynomial([-2, -2, 2]),
+        Polynomial([3]),
     )
+    assert divmod(sample, sample) == (Polynomial([1]), zero)
     assert divmod(Polynomial.X(7), Polynomial.X(2)) == (
         Polynomial.X(5),
-        Polynomial.zero(),
-    )
-    assert divmod(Polynomial([1, 1]), Polynomial([2])) == (
-        Polynomial([0.5, 0.5]),
-        Polynomial.zero(),
-    )
-    assert divmod(Polynomial([2, 3]), Polynomial([4, 2])) == (
-        Polynomial([1.5]),
-        Polynomial([-4]),
+        zero,
     )
     with pytest.raises(ZeroDivisionError):
-        divmod(Polynomial([2, 2]), Polynomial.zero())
+        divmod(sample, zero)
 
 
-def test_gcd():
-    assert Polynomial.gcd(Polynomial([1, 2]), Polynomial.zero()) == Polynomial([0.5, 1])
-    assert Polynomial.gcd(Polynomial.zero(), Polynomial([1, 2])) == Polynomial([0.5, 1])
-    assert Polynomial.gcd(Polynomial.zero(), Polynomial.zero()) == Polynomial.zero()
-    assert Polynomial.gcd(Polynomial([0, 1, 1]), Polynomial([0, -1, 1])) == Polynomial(
-        [0, 1]
-    )
+def test_gcd(zero: Polynomial, sample: Polynomial):
+    one = Polynomial([1])
+    assert Polynomial.gcd(sample, zero) == sample.make_monic()
+    assert Polynomial.gcd(zero, sample) == sample.make_monic()
+    assert Polynomial.gcd(zero, zero) == zero
+    assert Polynomial.gcd(sample, Polynomial.X()) == one
+    assert Polynomial.gcd(Polynomial([1, 2]), sample) == one
+    assert Polynomial.gcd(sample, Polynomial([1, 2, 3])) == one
     assert Polynomial.gcd(
-        Polynomial([0, 1, 1]), Polynomial([0, -1, 0, 1])
-    ) == Polynomial([0, 1, 1])
-    assert Polynomial.gcd(
-        Polynomial([0, 2, 1]), Polynomial([0, -1, 0, 1])
-    ) == Polynomial([0, 1])
-    assert Polynomial.gcd(Polynomial([0, 1]), Polynomial([2, 1])) == Polynomial([1])
-    assert Polynomial.gcd(
-        Polynomial([-1, 0, -1, 0, 1, 0, 1]), Polynomial([1, -3, 2, -3, 1])
-    ) == 0.9999999999999999 * Polynomial([1, 0, 1])
-    # rounding error because of float's shortcomings, better use Decimal instead
-    # https://docs.python.org/3/library/decimal.html
+        Polynomial.parse("X^2 - 1*X^0"), Polynomial.parse("X^2 + 2*X +X^0")
+    ) == Polynomial.parse("X + X^0")
 
 
 def test_parse():
+    # TODO: refactor
     assert Polynomial.parse("2 * X^2 - 4 * X + 6 * X^0") == Polynomial([6, -4, 2])
     assert Polynomial.parse("2 * X^2 - 2 * X^2") == Polynomial.zero()
     assert Polynomial.parse("4 * X^4 - 2 * X^2 - 4 * X^6") == Polynomial(
@@ -143,28 +142,32 @@ def test_parse():
         Polynomial.parse("X", "T")
 
 
-def test_pow():
-    assert Polynomial([1, 1]) ** 2 == Polynomial([1, 2, 1])
-    assert Polynomial([1, 1]) ** 3 == Polynomial([1, 3, 3, 1])
-    assert Polynomial([1, 1]) ** 4 == Polynomial([1, 4, 6, 4, 1])
+def test_pow(zero: Polynomial, sample: Polynomial):
+    assert zero**0 == sample**0 == Polynomial([1])
+    assert sample**1 == sample
+    assert sample**2 == Polynomial([1, -8, 16, 4, -16, 0, 4])
     with pytest.raises(ValueError):
-        pow(Polynomial([5, 2]), -2)
+        pow(sample, -2)
     with pytest.raises(TypeError):
-        pow(Polynomial([5, 2]), "not ok")
+        pow(sample, "not ok")
 
 
-def test_call():
-    assert Polynomial([1, 0, 3])(2) == 13
-    assert Polynomial.zero()(2) == 0
-    assert Polynomial.X(7)(2) == 128
+def test_call(zero: Polynomial, sample: Polynomial):
+    assert zero(2) == 0
+    assert sample(0) == 1
+    assert sample(1) == -1
+    assert Polynomial.X(7)(2) == 2**7 == 128
 
 
-def test_derivative():
-    assert Polynomial.X(5).derivative() == Polynomial([0, 0, 0, 0, 5])
-    assert Polynomial([4, 2, 1]).derivative() == Polynomial([2, 2])
-    assert Polynomial([4, 2, 1]).derivative(2) == Polynomial([2])
-    assert Polynomial([4, 2, 1]).derivative(3) == Polynomial.zero()
+def test_derivative(zero: Polynomial, sample: Polynomial):
+    assert sample.derivative(0) == sample
+    assert sample.derivative(1) == Polynomial([-4, 0, 6])
+    assert sample.derivative(2) == Polynomial([0, 12])
+    assert sample.derivative(3) == Polynomial([12])
+    assert sample.derivative(4) == zero
+    for n in range(1, 10):
+        assert Polynomial.X(n).derivative() == n * Polynomial.X(n - 1)
     with pytest.raises(ValueError):
-        Polynomial([1, 2]).derivative(-5)
+        sample.derivative(-5)
     with pytest.raises(TypeError):
-        Polynomial([0, 1]).derivative("not ok")
+        sample.derivative("not ok")
