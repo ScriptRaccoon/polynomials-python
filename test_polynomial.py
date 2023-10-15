@@ -61,12 +61,13 @@ def test_mul():
     assert Polynomial([2, 3]) * 5 == Polynomial([10, 15])
     assert 2 * Polynomial([1, -1]) == Polynomial([2, -2])
     assert Polynomial([10, 2]) * 0.1 == Polynomial([1, 0.2])
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(TypeError):
         "test" * Polynomial([10, 2])
 
 
 def test_lead_coefficient():
-    assert Polynomial.zero().lead_coefficient() == 0
+    with pytest.raises(ValueError):
+        Polynomial.zero().lead_coefficient()
     assert Polynomial([4, -1]).lead_coefficient() == -1
     assert Polynomial([2, 0, 2, 0]).lead_coefficient() == 2
     assert Polynomial([4, 1]).is_monic()
@@ -74,9 +75,10 @@ def test_lead_coefficient():
 
 
 def test_normed():
-    assert Polynomial([3, 2]).normed() == Polynomial([1.5, 1])
-    assert Polynomial.zero().normed() == Polynomial.zero()
-    assert Polynomial.X(5).normed() == Polynomial.X(5)
+    assert Polynomial([3, 2]).make_monic() == Polynomial([1.5, 1])
+    with pytest.raises(ValueError):
+        Polynomial.zero().make_monic()
+    assert Polynomial.X(5).make_monic() == Polynomial.X(5)
 
 
 def test_polydiv():
@@ -103,6 +105,7 @@ def test_polydiv():
 def test_gcd():
     assert Polynomial.gcd(Polynomial([1, 2]), Polynomial.zero()) == Polynomial([0.5, 1])
     assert Polynomial.gcd(Polynomial.zero(), Polynomial([1, 2])) == Polynomial([0.5, 1])
+    assert Polynomial.gcd(Polynomial.zero(), Polynomial.zero()) == Polynomial.zero()
     assert Polynomial.gcd(Polynomial([0, 1, 1]), Polynomial([0, -1, 1])) == Polynomial(
         [0, 1]
     )
@@ -141,11 +144,13 @@ def test_parse():
 
 
 def test_pow():
-    assert pow(Polynomial([1, 1]), 2) == Polynomial([1, 2, 1])
-    assert pow(Polynomial([1, 1]), 3) == Polynomial([1, 3, 3, 1])
-    assert pow(Polynomial([1, 1]), 4) == Polynomial([1, 4, 6, 4, 1])
-    with pytest.raises(NotImplementedError):
+    assert Polynomial([1, 1]) ** 2 == Polynomial([1, 2, 1])
+    assert Polynomial([1, 1]) ** 3 == Polynomial([1, 3, 3, 1])
+    assert Polynomial([1, 1]) ** 4 == Polynomial([1, 4, 6, 4, 1])
+    with pytest.raises(ValueError):
         pow(Polynomial([5, 2]), -2)
+    with pytest.raises(TypeError):
+        pow(Polynomial([5, 2]), "not ok")
 
 
 def test_call():
@@ -159,3 +164,7 @@ def test_derivative():
     assert Polynomial([4, 2, 1]).derivative() == Polynomial([2, 2])
     assert Polynomial([4, 2, 1]).derivative(2) == Polynomial([2])
     assert Polynomial([4, 2, 1]).derivative(3) == Polynomial.zero()
+    with pytest.raises(ValueError):
+        Polynomial([1, 2]).derivative(-5)
+    with pytest.raises(TypeError):
+        Polynomial([0, 1]).derivative("not ok")

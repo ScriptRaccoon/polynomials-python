@@ -2,37 +2,68 @@ from __future__ import annotations
 from typing import cast
 
 INFINITY = float("inf")
+"""Number 'infinity'"""
 
 
 class Polynomial:
-    """Class for polynomials over the rational numbers
-    The polynomial a_0 + a_1 X + a_2 X^2 + .... is encoded by the finite sequence
-    [a_0, a_1, a_2, ...]"""
+    """
+    Class for polynomials in one variable over the rational numbers
+
+    Attributes:
+
+        coeffs - List of coefficients. The list [a_0,a_1,a_2,...]
+            represents the polynomial a_0 + a_1 X + a_2 X^2 + ....
+
+        var - Variable of the polynomial, defaults to X. Used for printing.
+
+    """
 
     def __init__(self, coeffs: list[float | int] = [], var: str = "X") -> None:
-        """constructor accepting a list of coefficients"""
+        """
+        Constructor function creating a new polynomial.
+
+        Arguments:
+            coeffs - List of coefficients
+
+            var - Variable for the polynomial
+        """
         self.coeffs = coeffs
         self.var = var
         self.__shorten()
 
     def __shorten(self) -> None:
-        """removes the zero coefficients in the end"""
+        """
+        Internal method removing the zero coefficients in the end.
+        """
         i = len(self) - 1
         while i >= 0 and self.coeffs[i] == 0:
             self.coeffs.pop()
             i -= 1
 
     def copy(self) -> Polynomial:
+        """
+        Creates a copy of a polynomial
+        """
         return Polynomial(self.coeffs[:])
 
     def __eq__(self, other: object) -> bool:
-        """equality test"""
+        """
+        Checks if a polynomial is equal to another polynomial.
+        This Dunder method is executed when writing p == q for a polynomial p.
+        """
         if not isinstance(other, Polynomial):
             return False
         return self.coeffs == other.coeffs
 
     def __str__(self) -> str:
-        """pretty string representation"""
+        """
+        Dunder method producing a readable string representation of a polynomial p.
+        This string is printed when calling print(p).
+        For example, Polynomial([0,1,3]) will return the string "1*X^1 + 3*X^3".
+
+        Returns:
+            String representation of a polynomial
+        """
         if all(c == 0 for c in self.coeffs):
             return "0"
 
@@ -50,61 +81,149 @@ class Polynomial:
         return s.strip()
 
     def __len__(self) -> int:
-        """returns the number of coefficients"""
+        """
+        Computes the length of a polynomial p, defined as the length of its
+        list of coefficients. This Dunder method can be called with len(p).
+
+        Returns:
+            Length of the list of coefficients
+        """
         return len(self.coeffs)
 
-    def __call__(self, val: int | float) -> int | float:
-        return sum([self.coeffs[k] * val**k for k in range(len(self))])
+    def __call__(self, num: int | float) -> int | float:
+        """
+        Evaluates a polynomial p at any given number num.
+        This Dunder method can be called as p(num).
+
+        Arguments:
+            num - Any number
+
+        Returns:
+            Value of the polynomial at the given number
+        """
+        return sum([self.coeffs[k] * num**k for k in range(len(self))])
 
     @staticmethod
     def zero() -> Polynomial:
-        """returns the zero polynomial"""
+        """
+        Computes the zero polynomial, whose list of coefficients is empty.
+
+        Returns:
+            The zero polynomial
+        """
         return Polynomial([])
 
     def is_zero(self) -> bool:
-        """checks if polynomial is zero"""
+        """
+        Checks if a polynomial is zero.
+
+        Returns:
+            True if the polynomial is zero, False otherwise
+        """
         return len(self) == 0
 
     def degree(self) -> float | int:
-        """returns the degree of the polynomial.
-        the zero polynomial has degree -infinity"""
+        """
+        Computes the degree of a polynomial.
+        The zero polynomial has degree -infinity, which is a float.
+        For all other polynomials the degree is a natural number.
+
+        Returns:
+            The degree of the polynomial
+        """
         if len(self) == 0:
             return -INFINITY
         return len(self) - 1
 
     def __scale(self, u: float | int) -> Polynomial:
-        """returns a scalar multiple of the polynomial"""
+        """
+        Returns a scalar multiple of the polynomial.
+
+        Arguments:
+            u: The scalar
+
+        Returns:
+            The scalar multiple u * self
+        """
         return Polynomial([u * coeff for coeff in self.coeffs])
 
     @staticmethod
     def X(n: int = 1) -> Polynomial:
-        """returns the polynomial X^n, with n=1 being default"""
+        """
+        Computes the polynomial X^n, the default being n = 1.
+        For example, X^3 has coefficient list [0,0,0,1].
+
+        Arguments:
+            n: The exponent
+
+        Returns:
+            The polynomial X^n
+        """
         coeffs = cast(list[int | float], [0] * n + [1])
         return Polynomial(coeffs)
 
     def lead_coefficient(self) -> float | int:
-        """gets the lead coefficient of the polynomial, 0 in case it's the zero polynomial"""
+        """
+        Computes the lead coefficient of a polynomial, which is the last non-zero coefficient.
+        The zero polynomial has no lead coefficient.
+
+        Returns:
+            The lead coefficient
+
+        Raises:
+            ValueError: When the polynomial is zero
+        """
         if self.is_zero():
-            return 0
+            raise ValueError("The zero polynomial has no lead coefficient.")
         return self.coeffs[-1]
 
     def is_monic(self) -> bool:
-        """checks if a polynomial is monic"""
-        return self.lead_coefficient() == 1
+        """
+        Checks if a polynomial is monic, i.e. its lead coefficient is 1.
+        The zero polynomial is not monic.
 
-    def normed(self) -> Polynomial:
-        """makes a polynomial monic"""
+        Returns:
+            True if the polynomial is monic, False otherwise
+        """
+        return not self.is_zero() and self.lead_coefficient() == 1
+
+    def make_monic(self) -> Polynomial:
+        """
+        Makes a polynomial monic by dividing it through its lead coefficient.
+        The zero polynomial cannot be made monic, since it has no lead coefficient.
+
+        Returns:
+            A new monic polynomial
+
+        Raises:
+            ValueError: When the polynomial is zero
+        """
         if self.is_zero():
-            return self
+            raise ValueError("The zero polynomial cannot be made monic.")
         a = self.lead_coefficient()
         return self.__scale(1 / a)
 
     def __neg__(self) -> Polynomial:
-        """computes the additive inverse of a polynomial"""
+        """
+        Computes the additive inverse of a polynomial p.
+        This Dunder method can be executed by writing -p.
+
+        Returns:
+            The additive inverse
+        """
         return self.__scale(-1)
 
     def __add__(self, other: Polynomial) -> Polynomial:
-        """adds two polynomials"""
+        """
+        Computes the sum of two polynomials.
+        This Dunder method can be executing by writing p + q.
+
+        Arguments:
+            other: a polynomial
+
+        Returns:
+            The sum of the two polynomials
+        """
         n = max(len(self), len(other))
         sum_coeffs = []
         for i in range(n):
@@ -114,15 +233,32 @@ class Polynomial:
         return Polynomial(sum_coeffs)
 
     def __sub__(self, q: Polynomial) -> Polynomial:
-        "subtracts two polynomials"
+        """
+        Computes the difference (subtraction) of two polynomials.
+        This Dunder method can be executed by writing p - q.
+
+        Arguments:
+            other: a polynomial
+
+        Returns:
+            The difference of the two polynomials
+        """
         return self + (-q)
 
     def __mul__(self, other: Polynomial | float | int) -> Polynomial:
-        """multiplies two polynomials"""
+        """
+        Computes the product of two polynomials.
+        This Dunder method can be executed by writing p * q.
+
+        Arguments:
+            other: a polynomial or a number
+
+        Returns:
+            The product of two polynomials
+        """
         if isinstance(other, float | int):
             return self.__scale(other)
         coeffs: list[int | float] = []
-
         if self.is_zero() < 0 or other.is_zero():
             return Polynomial.zero()
         n = cast(int, self.degree())
@@ -137,26 +273,65 @@ class Polynomial:
         return Polynomial(coeffs)
 
     def __rmul__(self, other) -> Polynomial:
-        """computes a scalar multiple with a polynomial on the right"""
+        """
+        Computes the product (scalar multiple) of a polynomial p with a scalar u.
+        This Dunder method can be executed by writing u * p.
+
+        Arguments:
+            other: a number
+
+        Returns:
+            The product of the polynomial with the number
+
+        Raises:
+            TypeError: When the argument is not a number
+        """
         if isinstance(other, float | int):
             return self.__scale(other)
         else:
-            raise NotImplementedError
+            raise TypeError("Argument needs to be a number.")
 
     def __pow__(self, n: int) -> Polynomial:
-        """computes the power p^n of a polynomial to a natural number n"""
+        """
+        Computes the nth power of a polynomial p.
+        This Dunder method can be executed by writing p ** n.
+
+        Returns:
+            The power
+
+        Raises:
+            TypeError: When the exponent is not an integer
+            ValueError: When the exponent is negative
+        """
+
+        if not isinstance(n, int):
+            raise TypeError("Exponent needs to be an integer.")
         if n < 0:
-            raise NotImplementedError
+            raise ValueError("Exponent needs to be non-negative.")
         if n == 0:
             return Polynomial([1])
         return self * pow(self, n - 1)
 
     def __divmod__(self, other: Polynomial) -> tuple[Polynomial, Polynomial]:
-        """computes a tuple (q,r) of polynomials such that self = q * other + r
-        and deg(r) < deg(other). only allowed when other is not zero."""
-        err_msg = "Polynomial division is not allowed for the zero polynomial."
+        """
+        Polynomial division: Given two polynomials self, other, computes
+        a tuple (q,r) of polynomials such that self = q * other + r
+        and deg(r) < deg(other). The implementation is recursive.
+        This Dunder method can be executed by writing divmod(self,other).
+
+        Arguments:
+            other: any polynomial
+
+        Returns:
+            Tuple (q,r) consiting of quotient q and remainder r of the polynomial division
+
+        Raises:
+            ZeroDivisionError: When the other polynomial is zero
+        """
         if other.is_zero():
-            raise ZeroDivisionError(err_msg)
+            raise ZeroDivisionError(
+                "Polynomial division is not allowed for the zero polynomial."
+            )
 
         if self.is_zero():
             return Polynomial.zero(), Polynomial.zero()
@@ -178,12 +353,23 @@ class Polynomial:
 
     @staticmethod
     def gcd(p: Polynomial, q: Polynomial) -> Polynomial:
-        """computes the greatest common divisor of two polynomials p,q
-        with the Euclidean algorithm"""
+        """
+        Computes the greatest common divisor of two polynomials with the
+        Euclidean algorithm (https://en.wikipedia.org/wiki/Euclidean_algorithm).
+        To make the gcd unique, the result is made monic in case it's non-zero.
+
+        Arguments:
+            other: any polynomial
+
+        Returns:
+            The greatest common divisor (gcd) of the two polynomials
+        """
+        if p.is_zero() and q.is_zero():
+            return p
         if p.is_zero():
-            return q.normed()
+            return q.make_monic()
         if q.is_zero():
-            return p.normed()
+            return p.make_monic()
         if p.degree() < q.degree():
             return Polynomial.gcd(q, p)
         _, rem = divmod(p, q)
@@ -191,7 +377,20 @@ class Polynomial:
 
     @staticmethod
     def parse(str: str, var="X") -> Polynomial:
-        """parses a string to a polynomial if possible"""
+        """
+        Parses a string to a polynomial if possible.
+        For example, "2 * X^2 - 4 * X + 6 * X^0" returns Polynomial([6, -4, 2]).
+
+        Arguments:
+            str: a string representation a polynomial
+            var: the variable, defaults to "X"
+
+        Returns:
+            a polynomial representing the given string
+
+        Raises:
+            ValueError: When the string cannot be parsed to a polynomial
+        """
         coeffs: list[float | int] = []
         str = str.strip().replace("-", "+-").replace(" ", "")
         summands = str.split("+")
@@ -206,7 +405,7 @@ class Polynomial:
             try:
                 coeff = float(coeff_str)
             except:
-                raise ValueError(f"Coefficient '{coeff_str}' is not a number")
+                raise ValueError(f"Coefficient '{coeff_str}' is not a number.")
 
             if monomial == var:
                 monomial += "^1"
@@ -216,7 +415,7 @@ class Polynomial:
                 and len(monomial) > 2
             )
             if not monomial_valid:
-                raise ValueError(f"'{monomial}' is not a valid monomial in {var}")
+                raise ValueError(f"'{monomial}' is not a valid monomial in {var}.")
 
             exponent = int(monomial[2:])
             while exponent >= len(coeffs):
@@ -227,6 +426,23 @@ class Polynomial:
         return Polynomial(coeffs, var)
 
     def derivative(self, n: int = 1) -> Polynomial:
+        """
+        Computes the n-th derivative of a polynomial.
+
+        Arguments:
+            n: the degree of the derivative, defaults to 1
+
+        Returns:
+            the n-th derivative
+
+        Raises:
+            TypeError: When the exponent is not an integer
+            ValueError: When the exponent is negative
+        """
+        if not isinstance(n, int):
+            raise TypeError("Exponent needs to be an integer.")
+        if n < 0:
+            raise ValueError("Exponent needs to be non-negative.")
         if n == 0:
             return self
         p = self.derivative(n - 1)
