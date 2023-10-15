@@ -13,7 +13,7 @@ def remove_spaces(txt: str) -> str:
 
 def parse_by_operators(
     txt: str, operators: list[str], default: str | None = None
-) -> dict:
+) -> dict[str, list[str]]:
     """
     Parses a string by a list of unary operators.
     For example, the string "- x + y - z with the operators "+","-"
@@ -36,7 +36,7 @@ def parse_by_operators(
     txt = remove_spaces(txt)
     if default:
         txt = add_default_operator(txt, operators, default)
-    res: dict = {operator: [] for operator in operators}
+    res: dict[str, list[str]] = {operator: [] for operator in operators}
     current = ""
     operator = None
     for index in range(len(txt)):
