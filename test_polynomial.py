@@ -116,9 +116,9 @@ def test_gcd(zero: Polynomial, sample: Polynomial):
     assert Polynomial.gcd(sample, Polynomial.X()) == one
     assert Polynomial.gcd(Polynomial([1, 2]), sample) == one
     assert Polynomial.gcd(sample, Polynomial([1, 2, 3])) == one
-    assert Polynomial.gcd(
-        Polynomial.parse("X^2 - 1*X^0"), Polynomial.parse("X^2 + 2*X +X^0")
-    ) == Polynomial.parse("X + X^0")
+    assert Polynomial.gcd(Polynomial([-1, 0, 1]), Polynomial([1, 2, 1])) == Polynomial(
+        [1, 1]
+    )
 
 
 def test_parse():
