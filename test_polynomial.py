@@ -118,9 +118,9 @@ def test_gcd():
     assert Polynomial.gcd(Polynomial([0, 1]), Polynomial([2, 1])) == Polynomial([1])
     assert Polynomial.gcd(
         Polynomial([-1, 0, -1, 0, 1, 0, 1]), Polynomial([1, -3, 2, -3, 1])
-    ) == Polynomial(
-        [0.9999999999999999, 0, 0.9999999999999999]  # rounding error!
-    )
+    ) == 0.9999999999999999 * Polynomial([1, 0, 1])
+    # rounding error because of float's shortcomings, better use Decimal instead
+    # https://docs.python.org/3/library/decimal.html
 
 
 def test_parse():
