@@ -121,17 +121,19 @@ def test_gcd(zero: Polynomial, sample: Polynomial):
     )
 
 
-def test_parse():
-    # TODO: refactor
-    assert Polynomial.parse("2 * X^2 - 4 * X + 6 * X^0") == Polynomial([6, -4, 2])
-    assert Polynomial.parse("2 * X^2 - 2 * X^2") == Polynomial.zero()
-    assert Polynomial.parse("4 * X^4 - 2 * X^2 - 4 * X^6") == Polynomial(
-        [0, 0, -2, 0, 4, 0, -4]
-    )
-    assert Polynomial.parse("X^0 + X + X^2") == Polynomial([1, 1, 1])
-    assert Polynomial.parse("T^0 + T + T^2", "T") == Polynomial([1, 1, 1])
-    assert Polynomial.parse("2 * X") == 2 * Polynomial.X()
-    assert Polynomial.parse("-2 * X") == -2 * Polynomial.X()
+def test_parse(zero):
+    assert Polynomial.parse("-X^0") == Polynomial([-1])
+    assert Polynomial.parse("X^0") == Polynomial([1])
+    assert Polynomial.parse("X") == Polynomial.X()
+    assert Polynomial.parse("X^2") == Polynomial.X(2)
+    assert Polynomial.parse("2 * X") == Polynomial([0, 2])
+    assert Polynomial.parse("-2 * X") == Polynomial([0, -2])
+    assert Polynomial.parse("2 + X") == Polynomial([2, 1])
+    assert Polynomial.parse("-2 + X") == Polynomial([-2, 1])
+    assert Polynomial.parse("2 * X^2 - 2 * X^2") == zero
+    assert Polynomial.parse("1 + 2 * X + X^2") == Polynomial([1, 2, 1])
+    assert Polynomial.parse("T^0 - T^1 + T^2", "T") == Polynomial([1, -1, 1])
+
     with pytest.raises(ValueError):
         Polynomial.parse("2*X - X^")
     with pytest.raises(ValueError):
@@ -140,6 +142,8 @@ def test_parse():
         Polynomial.parse("2*X - X^r")
     with pytest.raises(ValueError):
         Polynomial.parse("X", "T")
+    with pytest.raises(ValueError):
+        Polynomial.parse("")
 
 
 def test_pow(zero: Polynomial, sample: Polynomial):
