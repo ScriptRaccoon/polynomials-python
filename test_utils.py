@@ -1,4 +1,9 @@
-from utils import *
+"""
+Tests for utils.py
+"""
+# pylint: disable=missing-function-docstring
+
+from utils import remove_spaces, add_default_operator, parse_by_operators
 
 
 def test_remove_spaces():
@@ -16,7 +21,7 @@ def test_add_operator():
 
 def test_parse_by_operators():
     ops = ["+", "-"]
-    assert parse_by_operators(" ", ops) == []
+    assert not parse_by_operators(" ", ops)
     assert parse_by_operators("+ x", ops) == [("+", "x")]
     assert parse_by_operators("x", ops, "+") == [("+", "x")]
     assert parse_by_operators("- x", ops) == [("-", "x")]
