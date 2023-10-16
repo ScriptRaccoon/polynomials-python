@@ -441,14 +441,13 @@ class Polynomial:
         coeffs: list[float | int] = [0]
         sign = {"+": 1, "-": -1}
         operators = ["+", "-"]
-        sum_dict = parse_by_operators(poly_str, operators, "+")
+        parse_by_operators(poly_str, operators, "+")
 
-        for operator in operators:
-            for monomial_str in sum_dict[operator]:
-                exponent, coeff = Polynomial.__parse_monomial(monomial_str, var)
-                while exponent >= len(coeffs):
-                    coeffs.append(0)
-                coeffs[exponent] += sign[operator] * coeff
+        for operator, monomial_str in parse_by_operators(poly_str, operators, "+"):
+            exponent, coeff = Polynomial.__parse_monomial(monomial_str, var)
+            while exponent >= len(coeffs):
+                coeffs.append(0)
+            coeffs[exponent] += sign[operator] * coeff
 
         return Polynomial(coeffs, var)
 

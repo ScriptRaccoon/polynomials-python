@@ -16,24 +16,28 @@ def test_add_operator():
 
 def test_parse_by_operators():
     ops = ["+", "-"]
-    assert parse_by_operators(" ", ops) == {"+": [], "-": []}
-    assert parse_by_operators("+ x", ops) == {"+": ["x"], "-": []}
-    assert parse_by_operators("x", ops, "+") == {"+": ["x"], "-": []}
-    assert parse_by_operators("- x", ops) == {"+": [], "-": ["x"]}
-    assert parse_by_operators("- x", ops, "+") == {"+": [], "-": ["x"]}
-    assert parse_by_operators("+ x + y + z", ops) == {
-        "+": ["x", "y", "z"],
-        "-": [],
-    }
-    assert parse_by_operators("x + y + z", ops, "+") == {
-        "+": ["x", "y", "z"],
-        "-": [],
-    }
-    assert parse_by_operators("+ x - y - z", ops, "+") == {
-        "+": ["x"],
-        "-": ["y", "z"],
-    }
-    assert parse_by_operators("- x + y - z", ops, "+") == {
-        "+": ["y"],
-        "-": ["x", "z"],
-    }
+    assert parse_by_operators(" ", ops) == []
+    assert parse_by_operators("+ x", ops) == [("+", "x")]
+    assert parse_by_operators("x", ops, "+") == [("+", "x")]
+    assert parse_by_operators("- x", ops) == [("-", "x")]
+    assert parse_by_operators("- x", ops, "+") == [("-", "x")]
+    assert parse_by_operators("+ x + y + z", ops) == [
+        ("+", "x"),
+        ("+", "y"),
+        ("+", "z"),
+    ]
+    assert parse_by_operators("x + y + z", ops, "+") == [
+        ("+", "x"),
+        ("+", "y"),
+        ("+", "z"),
+    ]
+    assert parse_by_operators("+ x - y - z", ops, "+") == [
+        ("+", "x"),
+        ("-", "y"),
+        ("-", "z"),
+    ]
+    assert parse_by_operators("- x + y - z", ops, "+") == [
+        ("-", "x"),
+        ("+", "y"),
+        ("-", "z"),
+    ]

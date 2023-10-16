@@ -18,42 +18,40 @@ def remove_spaces(txt: str) -> str:
 
 def parse_by_operators(
     txt: str, operators: list[str], default: str | None = None
-) -> dict[str, list[str]]:
+) -> list[tuple[str, str]]:
     """
     Parses a string by a list of unary operators.
-    For example, the string "- x + y - z with the operators "+","-"
-    returns the dictionary {"+": ["y"], "-": ["x", "z"]}.
+    For example, the string - x + y - z with the operators +",-
+    returns the list of tuples [(+,x),(+,y),(-,z)]
 
     When a default operator is given, it is added to the start
     (when no other operator is present there). For example,
     "x + y - z" is processed in the same way as "+ x + y - z"
-    when "+" is the default operator.
+    when + is the default operator.
 
     Arguments:
-        txt: any string
+        txt: any string to be parsed
         operators: any list of string-encoded operators
 
     Returns:
-        A dictionary whose keys are the operators and whose value
-        at an operator is the list of substrings to which this operator
-        has been applied in the given string
+       A list of pairs consisting of an operator and a variable
     """
     txt = remove_spaces(txt)
     if default:
         txt = add_default_operator(txt, operators, default)
-    res: dict[str, list[str]] = {operator: [] for operator in operators}
+    res: list[tuple[str, str]] = []
     current = ""
     operator = None
     for char in txt:
         if char in operators:
             if operator:
-                res[operator].append(current)
+                res.append((operator, current))
                 current = ""
             operator = char
         else:
             current += char
     if operator:
-        res[operator].append(current)
+        res.append((operator, current))
         current = ""
     return res
 
