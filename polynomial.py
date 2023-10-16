@@ -19,7 +19,7 @@ class Polynomial:
 
     """
 
-    def __init__(self, coeffs: list[float | int] = [], var: str = "X") -> None:
+    def __init__(self, coeffs: list[float | int], var: str = "X") -> None:
         """
         Constructor function creating a new polynomial.
 
