@@ -1,3 +1,8 @@
+"""
+This module containes utilities for the parsing function in the Polynomial class.
+"""
+
+
 def remove_spaces(txt: str) -> str:
     """
     Removes all spaces inside of a string
@@ -39,8 +44,7 @@ def parse_by_operators(
     res: dict[str, list[str]] = {operator: [] for operator in operators}
     current = ""
     operator = None
-    for index in range(len(txt)):
-        char = txt[index]
+    for char in txt:
         if char in operators:
             if operator:
                 res[operator].append(current)
@@ -69,7 +73,6 @@ def add_default_operator(txt: str, operators: list[str], default: str) -> str:
     Returns:
         the transformed string
     """
-    if any([txt.lstrip().startswith(operator) for operator in operators]):
+    if any(txt.lstrip().startswith(operator) for operator in operators):
         return txt
-    else:
-        return default + txt
+    return default + txt

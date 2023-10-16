@@ -1,3 +1,7 @@
+"""
+Module containing the Polynomial class. See docstring there.
+"""
+
 from __future__ import annotations
 from typing import cast
 from utils import parse_by_operators
@@ -102,7 +106,7 @@ class Polynomial:
         Returns:
             Value of the polynomial at the given number
         """
-        return sum([self.coeffs[k] * num**k for k in range(len(self))])
+        return sum(self.coeffs[k] * num**k for k in range(len(self)))
 
     @staticmethod
     def zero() -> Polynomial:
@@ -149,6 +153,7 @@ class Polynomial:
         return Polynomial([u * coeff for coeff in self.coeffs])
 
     @staticmethod
+    # pylint: disable=invalid-name
     def X(n: int = 1) -> Polynomial:
         """
         Computes the polynomial X^n, the default being n = 1.
@@ -289,8 +294,7 @@ class Polynomial:
         """
         if isinstance(other, float | int):
             return self.__scale(other)
-        else:
-            raise TypeError("Argument needs to be a number.")
+        raise TypeError("Argument needs to be a number.")
 
     def __pow__(self, n: int) -> Polynomial:
         """
@@ -372,18 +376,60 @@ class Polynomial:
         if q.is_zero():
             return p.make_monic()
         if p.degree() < q.degree():
+            # pylint: disable=arguments-out-of-order
             return Polynomial.gcd(q, p)
         _, rem = divmod(p, q)
         return Polynomial.gcd(q, rem)
 
     @staticmethod
-    def parse(txt: str, var="X") -> Polynomial:
+    def __parse_monomial(monomial_str: str, var="X") -> tuple[int, int | float]:
+        """
+        If the monomial string is c * X^k, returns the tuple (k, c).
+        The strings X^k, c, c * X, X are also parsed correctly as
+        (k,1), (0,c), (1,c), (1,1).
+
+        Arguments:
+            monomial_str: any string which is supposed to represent a monomial
+            var: the variable of the monomial, defaults to X
+
+        Returns:
+            the tuple (k,c) such that the monomial is represented by c * X^k
+
+        Raises:
+            ValueError: when the string cannot be parsed as a monomial
+        """
+        if monomial_str.isnumeric():
+            return 0, int(monomial_str)
+        if "*" in monomial_str:
+            coeff_str, power = monomial_str.split("*")
+        else:
+            coeff_str = "1"
+            power = monomial_str
+        try:
+            coeff = float(coeff_str)
+        except Exception as exc:
+            raise ValueError(f"Coefficient '{coeff_str}' is not a number.") from exc
+        if power == var:
+            power = var + "^1"
+
+        power_valid = (
+            power.startswith(var + "^") and power[2:].isnumeric() and len(power) > 2
+        )
+        if not power_valid:
+            raise ValueError(f"'{power}' is not a valid power of {var}.")
+
+        exponent = int(power[2:])
+
+        return exponent, coeff
+
+    @staticmethod
+    def parse(poly_str: str, var="X") -> Polynomial:
         """
         Parses a string to a polynomial if possible.
         For example, "2 * X^2 - 4 * X + 6 * X^0" returns Polynomial([6, -4, 2]).
 
         Arguments:
-            str: a string representation a polynomial
+            poly_str: a string representation a polynomial
             var: the variable, defaults to "X"
 
         Returns:
@@ -393,48 +439,16 @@ class Polynomial:
             ValueError: When the string cannot be parsed to a polynomial
         """
         coeffs: list[float | int] = [0]
-        ops = ["+", "-"]
-        sum_dict = parse_by_operators(txt, ops, "+")
+        sign = {"+": 1, "-": -1}
+        operators = ["+", "-"]
+        sum_dict = parse_by_operators(poly_str, operators, "+")
 
-        for op in ops:
-            for summand in sum_dict[op]:
-                if summand.isnumeric():
-                    if op == "+":
-                        coeffs[0] += int(summand)
-                    else:
-                        coeffs[0] -= int(summand)
-                    continue
-
-                if "*" in summand:
-                    coeff_str, monomial = summand.split("*")
-                else:
-                    coeff_str = "1"
-                    monomial = summand
-
-                try:
-                    coeff = float(coeff_str)
-                except:
-                    raise ValueError(f"Coefficient '{coeff_str}' is not a number.")
-
-                if monomial == var:
-                    monomial = var + "^1"
-
-                monomial_valid = (
-                    monomial.startswith(var + "^")
-                    and monomial[2:].isnumeric()
-                    and len(monomial) > 2
-                )
-                if not monomial_valid:
-                    raise ValueError(f"'{monomial}' is not a valid monomial in {var}.")
-
-                exponent = int(monomial[2:])
+        for operator in operators:
+            for monomial_str in sum_dict[operator]:
+                exponent, coeff = Polynomial.__parse_monomial(monomial_str, var)
                 while exponent >= len(coeffs):
                     coeffs.append(0)
-
-                if op == "+":
-                    coeffs[exponent] += coeff
-                else:
-                    coeffs[exponent] -= coeff
+                coeffs[exponent] += sign[operator] * coeff
 
         return Polynomial(coeffs, var)
 
