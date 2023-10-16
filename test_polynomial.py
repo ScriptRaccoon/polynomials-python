@@ -1,3 +1,8 @@
+"""
+Tests for polynomial.py
+"""
+# pylint: disable=missing-function-docstring, redefined-outer-name
+
 import pytest
 from polynomial import Polynomial, INFINITY
 
@@ -54,7 +59,7 @@ def test_sub(zero: Polynomial, sample: Polynomial):
     assert zero - sample == -sample
 
 
-def test_X():
+def test_x():
     x = Polynomial.X()
     assert x.degree() == 1
     assert x.coeffs == [0, 1]
@@ -71,7 +76,7 @@ def test_mul(zero: Polynomial, sample: Polynomial):
     assert sample * Polynomial.X(2) == Polynomial([0, 0, 1, -4, 0, 2])
     assert sample * 3 == 3 * sample == Polynomial([3, -12, 0, 6])
     with pytest.raises(TypeError):
-        "not ok" * sample
+        isinstance("not ok" * sample, Polynomial)
 
 
 def test_lead_coefficient(zero: Polynomial, sample: Polynomial):
