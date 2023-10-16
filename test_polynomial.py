@@ -133,6 +133,7 @@ def test_parse(zero):
     assert Polynomial.parse("2 * X^2 - 2 * X^2") == zero
     assert Polynomial.parse("1 + 2 * X + X^2") == Polynomial([1, 2, 1])
     assert Polynomial.parse("T^0 - T^1 + T^2", "T") == Polynomial([1, -1, 1])
+    assert Polynomial.parse("U^3 - U", var="U") == Polynomial([0, -1, 0, 1])
 
     with pytest.raises(ValueError):
         Polynomial.parse("2*X - X^")
