@@ -68,7 +68,7 @@ def test_mul():
     assert sample * Polynomial([1, 2]) == Polynomial([1, -2, -8, 2, 4])
     assert Polynomial([1, 2]) * sample == Polynomial([1, -2, -8, 2, 4])
     assert sample * Polynomial.X(2) == Polynomial([0, 0, 1, -4, 0, 2])
-    assert sample * 3 == 3 * sample == Polynomial([3, -12, 0, 6])
+    assert sample * Polynomial([3]) == Polynomial([3, -12, 0, 6])
     with pytest.raises(TypeError):
         isinstance("not ok" * sample, Polynomial)
 
@@ -170,7 +170,7 @@ def test_derivative():
     assert sample.derivative(3) == Polynomial([12])
     assert sample.derivative(4) == zero
     for n in range(1, 10):
-        assert Polynomial.X(n).derivative() == n * Polynomial.X(n - 1)
+        assert Polynomial.X(n).derivative() == Polynomial([n]) * Polynomial.X(n - 1)
     with pytest.raises(ValueError):
         sample.derivative(-5)
     with pytest.raises(TypeError):

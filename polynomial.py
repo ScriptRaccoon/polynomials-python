@@ -251,19 +251,17 @@ class Polynomial:
         """
         return self + (-q)
 
-    def __mul__(self, other: Polynomial | float | int) -> Polynomial:
+    def __mul__(self, other: Polynomial) -> Polynomial:
         """
         Computes the product of two polynomials.
         This Dunder method can be executed by writing p * q.
 
         Arguments:
-            other: a polynomial or a number
+            other: a polynomial
 
         Returns:
             The product of two polynomials
         """
-        if isinstance(other, float | int):
-            return self.__scale(other)
         coeffs: list[int | float] = []
         if self.is_zero() or other.is_zero():
             return Polynomial.zero()
@@ -277,24 +275,6 @@ class Polynomial:
             ]
             coeffs.append(sum(seq))
         return Polynomial(coeffs)
-
-    def __rmul__(self, other) -> Polynomial:
-        """
-        Computes the product (scalar multiple) of a polynomial p with a scalar u.
-        This Dunder method can be executed by writing u * p.
-
-        Arguments:
-            other: a number
-
-        Returns:
-            The product of the polynomial with the number
-
-        Raises:
-            TypeError: When the argument is not a number
-        """
-        if isinstance(other, float | int):
-            return self.__scale(other)
-        raise TypeError("Argument needs to be a number.")
 
     def __pow__(self, n: int) -> Polynomial:
         """
@@ -350,7 +330,7 @@ class Polynomial:
         lead_self = self.lead_coefficient()
         lead_other = other.lead_coefficient()
 
-        corr_term = Polynomial.X(n - m) * (lead_self / lead_other)
+        corr_term = Polynomial([lead_self / lead_other]) * Polynomial.X(n - m)
         f = self - corr_term * other
         quot, rem = divmod(f, other)
 
