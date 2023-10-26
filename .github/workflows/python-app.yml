@@ -13,9 +13,8 @@ permissions:
     contents: read
 
 jobs:
-    build:
+    lint-and-test:
         runs-on: ubuntu-latest
-
         steps:
             - uses: actions/checkout@v3
             - name: Set up Python 3.11
@@ -36,6 +35,6 @@ jobs:
             - name: Lint with pylint
               run: |
                   pylint --recursive=y .
-            - name: Test with pytest
+            - name: Test with pytest and pytest-cov
               run: |
-                  pytest
+                  pytest --cov --cov-report term-missing
